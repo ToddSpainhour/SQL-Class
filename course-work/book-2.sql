@@ -100,67 +100,6 @@ or e.first_name like '%E'
 
 
 
-
--------------group project stuff
-
-select *
-from vehicletypes v 
-
---create the new tables (vehiclebodytype, vehiclemodel, vehiclemake)
-
-create table VehicleBodyType (
-	vehicle_body_type_id INT primary key generated always as identity,
-	name VARCHAR(20)
-);
-
-create table VehicleModel (
-	vehicle_model_id INT primary key generated always as identity,
-	name VARCHAR(20)
-);
-
-create table VehicleMake (
-	vehicle_make_id INT primary key generated always as identity,
-	name VARCHAR(20)
-);
-
-
-select *
-from vehiclebodytype v 
-
-
-select *
-from vehicleModel
-
-
-select *
-from vehiclemake v 
-
-
-select *
-from vehicletypes v 
-
-
---- data migration --
-
--- A data migration will need to take place for Carnival where we will convert text to integers. 
--- Since that is not a learning requirment at this point we are providing the SQL script for you to conduct this.
--- The result of the script will change all the text words to id integers. 
--- The important thing to note is that the data migration script does not change the datatype of these fields.
--- You will be respnonsible for changing the datatype in the next practice below.
-
-
--- the data migration code... you still need to create a body_type table
--- do the data migration before the alter table
-
--- to enforce capitalization in table names surround them in double quotes when creating the table
-
-select *
-from vehicleTypes
-	
-	
-
-
-
 ----- Book 2 Chapter 3 JOINING DATA -----
 
 --Practice Question - Get a list of the sales that were made for each sales type.
@@ -217,8 +156,72 @@ order by business_name
 
 --Practice Question - Get a list of vehicles with the names of the body type, make, model and color.
  
+select 
+	vbt.name as "Body Type",
+	vm.name as "Make",
+	vmod.name as "Model",
+	v.exterior_color as "Color"
+from vehicletypes vt
+	join vehiclebodytype vbt 
+		on vbt.vehicle_body_type_id  = vt.body_type::int
+	join vehiclemake vm 
+		on vm.vehicle_make_id = vt.make::int
+	join vehiclemodel vmod 
+		on vmod.vehicle_model_id = vt.model::int
+	join vehicles v 
+		on v.vehicle_type_id = vt.vehicle_type_id 
+
+
+
+----- Book 2 Chapter 4 COMPLEX JOINS -----
+
+
+--Practice Question - Produce a report that lists every dealership, the number of purchases done by each, and the number of leases done by each.
+
+select *
+from dealerships d
+--dealership_id, business_name
+
+select *
+from sales s
+-- has dealership_id, sales_type_id
+
+select *
+from salestypes st 
+-- sales_type-id, name
+
+
+-- only show dealership once
+-- count of purchases
+-- count of leases
+
+--STOPPED HERE
+select 
+	distinct d.dealership_id as "dealership id",
+	d.business_name
+from dealerships d 
+left join sales s 
+on s.dealership_id = d.dealership_id 
+order by d.dealership_id 
+
+
+-- go into sales and count how many leases each dealership id has
 
 
 
 
+
+
+--Practice Question - Produce a report that determines the most popular vehicle model that is leased.
+
+
+
+
+
+--Practice Question - What is the most popular vehicle make in terms of number of sales?
+
+
+
+
+--Practice Question - Which employee type sold the most of that make?
 
