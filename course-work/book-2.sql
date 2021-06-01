@@ -214,6 +214,38 @@ order by d.dealership_id
 
 --Practice Question - Produce a report that determines the most popular vehicle model that is leased.
 
+select * from sales s 
+select * from vehicletypes v
+
+-- get all leases from sales, join with vehicletypes on vehicle-type-id, find the most repeated number in the model column
+
+select 
+	s.sales_type_id,
+	s.vehicle_id,
+	vt.model
+from sales s 
+join vehicletypes vt 
+on s.vehicle_id = vt.vehicle_type_id 
+where s.sales_type_id = 2
+order by vt.model 
+
+
+order vt.model 
+
+
+join vehiclemodel vm 
+s.vehicle_id = vm.
+
+select *
+from vehiclemodel vm 
+
+--need sales
+-- find largest reoccuring vehicle model
+--need salestypes
+
+
+
+
 
 
 
