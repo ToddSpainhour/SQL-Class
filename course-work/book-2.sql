@@ -1,4 +1,6 @@
 
+-- Book 2 - Basic Query
+
 -- practice question: Write a query that returns the business name, city, state, and website for each dealership. Use an alias for the Dealerships table.
 
 	select 
@@ -8,9 +10,8 @@
 		d.website
 	from dealerships d 
 
-
-
-
+	
+	
 -- practice question: Write a query that returns the first name, last name, and email address of every customer. Use an alias for the Customers table.
 
 	select
@@ -21,62 +22,37 @@
 
 
 
-
 ----- Book 2 Chapter 2 Filtering Data -----
-
-	select
-		last_name, first_name, city, state
-	from
-		customers 
-	where
-		state = 'TX';	
-	
-	-----
-	
-	select
-		last_name, first_name, city, state
-	from
-		customers 
-	where
-		city = 'Houston' and state = 'TX';
-	
-	-----
-	
-	select
-		last_name, first_name, city, state
-	from
-		customers 
-	where
-		state = 'TX' or state = 'TN';	
-	
-	-----
-	
-	SELECT
-		last_name, first_name, city, state
-	FROM
-		customers
-	WHERE
-		state IN ('TX', 'TN', 'CA');	
-
-
-
-
 
 --Practice Question - Get a list of sales records where the sale was a lease.
 
 	select *
 	from sales s 
 	where sales_type_id = 2
-
-
-
 	
+	-- since some databases don't match, this would be safer...
+	
+	select *
+	from sales s 
+	join salestypes st 
+	on s.sales_type_id = st.sales_type_id 
+	where name = 'Lease'
+
+
+
 --Practice Question - Get a list of sales where the purchase date is within the last two years.
 	
 	select *
 	from sales s 
 	where purchase_date > '2019-05-29'
 	order by purchase_date 
+	
+	-- even better would be...
+	
+	select count(sale_id)
+	from sales s 
+	where purchase_date >= now() - interval '2years'
+	--where purchase_date between >= current_date - interval'2years'
 	
 
 
@@ -87,6 +63,12 @@ select *
 from sales s 
 where s.deposit > 5000 OR s.payment_method = 'americanexpress'
 
+--operator 
+
+select *
+from sales s 
+where s.deposit > 5000 OR s.payment_method ilike 'american%'
+
 
 
 
@@ -96,6 +78,23 @@ select *
 from employees e 
 where e.first_name like 'M%'
 or e.first_name like '%E' 
+
+
+-- or... ilike ignores casing
+
+select *
+from employees e 
+where e.first_name ilike 'M%'
+or e.first_name ilike '%E' 
+
+
+
+
+--Practice Question - Get a list of employees whose phone numbers have the 604 area code.
+
+select *
+from employees e 
+where e.phone like '604%'
 
 
 
@@ -118,7 +117,7 @@ on s.sales_type_id = st.sales_type_id
 --and the name, city and state of the dealership.
 
 select 
-	vin, 
+	v.vin, 
 	c.first_name as "customer first name", 
 	c.last_name as "customer last name", 
 	e.first_name as "employee first name", 
@@ -127,15 +126,10 @@ select
 	d.city as "dealership city",
 	d.state as "dealership state"
 from sales s 
-join vehicles v 
-on s.vehicle_id = v.vehicle_id 
-join customers c 
-on s.customer_id = c.customer_id 
-join employees e 
-on s.employee_id = e.employee_id 
-join dealerships d 
-on s.dealership_id = d.dealership_id 
-
+join vehicles v on s.vehicle_id = v.vehicle_id 
+join customers c on s.customer_id = c.customer_id 
+join employees e on s.employee_id = e.employee_id 
+join dealerships d on s.dealership_id = d.dealership_id 
 
 
 
@@ -146,12 +140,9 @@ select
 	e.first_name as "employee first name",
 	e.last_name as "employee last name"
 from dealerships d 
-join dealershipemployees de 
-on d.dealership_id = de.dealership_id 
-join employees e 
-on de.dealership_employee_id = e.employee_id 
+join dealershipemployees de on d.dealership_id = de.dealership_id 
+join employees e on de.dealership_employee_id = e.employee_id 
 order by business_name 
-
 
 
 --Practice Question - Get a list of vehicles with the names of the body type, make, model and color.
@@ -256,4 +247,35 @@ from vehiclemodel vm
 
 
 --Practice Question - Which employee type sold the most of that make?
+
+
+
+
+
+-- Chapter 8 -- Carnival Sales Practice Questions
+
+-- Write a query that shows the total purchase sales income per dealership.
+
+select d.business_name, sum(s.price) as total_purchase_sales
+from dealerships d 
+join sales s on s.dealership_id = d.dealership_id 
+group by d.business_name 
+order by total_purchase_sales desc
+
+
+-- Write a query that shows the purchase sales income per dealership for the current year.
+
+select d.business_name, sum(s.price) as total_purchase_sales from dealerships d 	
+join sales s on s.dealership_id = d.dealership_id 
+where s.purchase_date > now() - interval '1 month'
+group by d.business_name 
+order by total_purchase_sales desc;
+
+
+-- Write a query that shows the lease income per dealership for the current year. 
+
+select * from sales
+
+
+
 
