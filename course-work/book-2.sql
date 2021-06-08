@@ -279,3 +279,128 @@ select * from sales
 
 
 
+-- Chapter 12 -- Views 
+
+
+-- Practice Question - Create a view that lists all vehicle body types, makes and models.
+
+create view vehicle_master as
+select
+	vbt."name" as "body type",
+	vmk."name" as "make",
+	vmd."name" as "model"
+from vehicles v 
+join vehicletypes vt on vt.vehicle_type_id = v.vehicle_type_id
+join vehiclebodytype vbt on vbt.vehicle_body_type_id = vt.body_type::int 
+join vehiclemake vmk on vmk.vehicle_make_id = vt.make::int 
+join vehiclemodel vmd on vmd.vehicle_model_id = vt.model::int 
+
+
+
+select * from vehicle_master
+
+
+
+--Practice Question - Create a view that shows the total number of employees for each employee type.
+
+create view employee_type_count as
+select 
+	et.name,
+	count(e.employee_type_id)
+from employeetypes et
+join employees e on et.employee_type_id = e.employee_type_id 
+group by et."name"
+order by count(e.employee_type_id) desc
+
+
+select * from employee_type_count
+
+
+
+-- Practice Question - Create a view that lists all customers without exposing their emails, phone numbers and street address.
+
+create view customer_minus_email_phone_address as
+select 
+	c.customer_id,
+	c.first_name,
+	c.last_name,
+	c.city,
+	c.state,
+	c.zipcode,
+	c.company_name
+from customers c 
+
+
+select * from customer_minus_email_phone_address
+
+
+
+ -- Practice Question - Create a view named sales2018 that shows the total number of sales for each sales type for the year 2018.
+
+create view sales2018 as
+select
+	st.name,
+	count(s.sales_type_id)
+from salestypes st
+join sales s on s.sales_type_id = st.sales_type_id 
+where extract(year from s.purchase_date) = 2018
+group by st.name
+order by count(s.sales_type_id) desc
+
+
+select * from sales2018
+
+
+
+
+--STOPPED HERE
+ -- Practice Question - Create a view that shows the employee at each dealership with the most number of sales.
+
+select * from dealershipemployees de 
+select * from dealerships d 
+select * from sales s -- employee_id
+select * from employees e -- employee_id,
+
+
+select * from sales s
+where s.employee_id = 394
+
+-- get the count of employee ids from sales
+-- distict employye ids in sales
+-- another word for distict 
+
+select 
+	d.business_name,
+	--d.dealership_id as "dealership_id from dealership",
+	--de.dealership_id as "dealership id from dealership_employees",
+	e.employee_id as "employee_id from employees",
+	e.first_name,
+	e.last_name, 
+	s.sale_id,
+	count(s.employee_id) as "number of sales"
+from dealerships d 
+join dealershipemployees de on d.dealership_id = de.dealership_id 
+join employees e on e.employee_id = de.employee_id 
+join sales s on s.employee_id = e.employee_id 
+group by d.business_name, e.employee_id, e.first_name, e.last_name, s.sale_id, s.employee_id 
+--order by count(s.employee_id) 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
