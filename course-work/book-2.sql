@@ -272,9 +272,155 @@ group by d.business_name
 order by total_purchase_sales desc;
 
 
+
+
+
 -- Write a query that shows the lease income per dealership for the current year. 
 
-select * from sales
+select d.business_name, sum(s.price) as total_purchase_sales from dealerships d 	
+join sales s on s.dealership_id = d.dealership_id 
+where s.purchase_date > now() - interval '1 year'
+group by d.business_name 
+order by total_purchase_sales desc;
+
+
+
+
+
+-- Write a query that shows the total lease income per dealership.
+
+select 
+	d.dealership_id,
+	s.dealership_id as "dealership-id-from-sales",
+	d.business_name,
+	sum(s.price)
+from dealerships d
+join sales s on s.dealership_id = d.dealership_id
+where s.sales_type_id = 2
+group by d.dealership_id, s.dealership_id, d.business_name
+order by s.dealership_id 
+
+
+
+
+
+-- Write a query that shows the lease income per dealership for the current month.
+
+select 
+	d.dealership_id,
+	s.dealership_id as "dealership-id-from-sales",
+	d.business_name,
+	s.purchase_date, 
+	sum(s.price)
+from dealerships d
+join sales s on s.dealership_id = d.dealership_id
+-- where s.sales_type_id = 2
+where s.purchase_date >= date_trunc('month', CURRENT_DATE)
+group by d.dealership_id, s.dealership_id, d.business_name, s.purchase_date 
+order by s.dealership_id 
+
+
+
+
+
+-- Write a query that shows the lease income per dealership for the current year.
+
+select 
+	d.dealership_id,
+	s.dealership_id as "dealership-id-from-sales",
+	d.business_name,
+	s.purchase_date, 
+	sum(s.price)
+from dealerships d
+join sales s on s.dealership_id = d.dealership_id
+-- where s.sales_type_id = 2
+where s.purchase_date >= date_trunc('year', CURRENT_DATE)
+group by d.dealership_id, s.dealership_id, d.business_name, s.purchase_date 
+order by s.dealership_id 
+
+
+
+
+
+-- Write a query that shows the total income (purchase and lease) per employee.
+
+select 
+	e.employee_id,
+	concat (e.first_name, ' ', e.last_name) as "Employee Name",
+	sum(s.price) as "Total Sales"
+from employees e
+join sales s on s.employee_id = e.employee_id 
+group by e.employee_id
+order by sum(s.price) desc
+
+
+
+
+
+-- Chapter 9 -- Inventory Turnover
+
+
+-- Which model of vehicle has the lowest current inventory? This will help dealerships know which models the purchase from manufacturers.
+
+select  
+	distinct count(v.vehicle_type_id) as "amount in inventory", 
+	vmk.name, 
+	vm.name
+from vehicles v 
+join vehicletypes vt on vt.vehicle_type_id = v.vehicle_type_id
+join vehiclemodel vm on vm.vehicle_model_id = vt.model::int
+join vehiclemake vmk on vmk.vehicle_make_id = vt.make::int 
+where v.is_sold = false
+group by vmk.name, vm.name
+order by count(v.vehicle_type_id)
+
+
+
+-- Which model of vehicle has the highest current inventory? This will help dealerships know which models are, perhaps, not selling.
+
+select  
+	distinct count(v.vehicle_type_id) as "amount in inventory", 
+	vmk.name, 
+	vm.name
+from vehicles v 
+join vehicletypes vt on vt.vehicle_type_id = v.vehicle_type_id
+join vehiclemodel vm on vm.vehicle_model_id = vt.model::int
+join vehiclemake vmk on vmk.vehicle_make_id = vt.make::int 
+where v.is_sold = false
+group by vmk.name, vm.name
+order by count(v.vehicle_type_id) DESC
+
+
+
+
+-- Which dealerships are currently selling the least number of vehicle models? This will let dealerships market vehicle models more effectively per region.
+
+select * from sales s 
+select * from dealerships d
+select * from vehicles v 
+
+-- this doesn't seem right. i think it's giving back to total number of cars they've sold...
+
+select 
+	v.is_sold,
+	v.dealership_location_id,
+	count(v.vehicle_type_id) as "count of similar vehicle types", 
+	d.dealership_id,
+	d.business_name 
+from vehicles v
+join dealerships d on d.dealership_id = v.dealership_location_id
+where v.is_sold = true
+group by v.is_sold, v.dealership_location_id, d.dealership_id, d.business_name
+order by d.business_name 
+
+
+
+
+
+
+
+
+
 
 
 
