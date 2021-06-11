@@ -32,21 +32,26 @@ where invoice_number = '9086714242'
 
 
 
--- Practice Question: A sales employee at carnival creates a new sales record for a sale they are trying to close. The customer, last minute decided not to purchase the vehicle. 
---Help delete the Sales record with an invoice number of '2436217483'.
+-- Practice Question
+-- A sales employee at carnival creates a new sales record for a sale they are trying to close. The customer, last minute decided not to purchase the vehicle. 
+-- Help delete the Sales record with an invoice number of '2436217483'.
+
+delete from sales 
+where invoice_number = '2436217483'
 
 
 
 
 
 
--- Practice Question: An employee was recently fired so we must delete them from our database. Delete the employee with employee_id of 35. What problems might you run into when deleting? 
---How would you recommend fixing it?
+-- Practice Question: 
+-- An employee was recently fired so we must delete them from our database. Delete the employee with employee_id of 35. What problems might you run into when deleting? 
+-- How would you recommend fixing it?
+
+select * from employees e 
 
 
-
-
-
+select * from dealerships d 
 
 
 
@@ -103,5 +108,43 @@ BEGIN
 	where vehicle_id = vehicle;
 	commit;
 end;$$
+
+
+
+select * from dealerships d 
+
+
+-- Chapter 5
+ 
+
+-- Practice Question
+-- Create a trigger for when a new Sales record is added, set the purchase date to 3 days from the current date.
+
+
+select * from sales
+order by sale_id desc 
+
+insert into sales
+values (1, null, 12, 7, 1, 234.56, 123, now(), null, null, 'credit card', false);
+
+
+
+create function setPurchaseDateThreeDaysFromToday()
+returns trigger
+language PlPGSQL
+as $$
+begin
+	update sales 
+	set purchase_date = new.purchase_date + 
+end;
+$$
+
+
+
+-- Practice Question
+-- Create a trigger for updates to the Sales table. If the pickup date is on or before the purchase date, set the pickup date to 7 days after the purchase date. 
+-- If the pickup date is after the purchase date but less than 7 days out from the purchase date, add 4 additional days to the pickup date.
+
+
 
 
