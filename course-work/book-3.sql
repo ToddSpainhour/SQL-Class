@@ -57,24 +57,152 @@ select * from dealerships d
 
 -- Chapter 3 - Stored Procedures Introduction
 
+/*
+stored procedures are predefined statements for executing SQL
+stored procedures do not use the return statement to return a value, but a return statement can halt a procedure
+it's common to use stored procedures all all procedures except SELECT (use User Defined Functions for SELECT since it has return statements)
+the big difference betwwen stored procedures and user defined functions is UDFs can be used like an expression in regular statements while stored procedures must be invoked using the CALL statement
+defining a procedure requires a name, parameters, language used, and embeded SQL statements
+
+
+Example:
+
+	CREATE PROCEDURE insert_data(IN a varchar, INOUT b varchar)
+	LANGUAGE plpgsql
+	AS $$
+	BEGIN
+	
+	INSERT INTO tbl(col) VALUES (a);
+	INSERT INTO tbl(col) VALUES (b);
+	
+	END
+	$$;
+
+
+To execute the stored procedure we use the CALL statement.
+
+	CALL insert_data(1, 2);
+*/
+
+
 
 -- Chapter 4 - Stored Procedures Practice
 
 -- test all the small parts to your stored procedure before wrapping it and calling it 
 
 
+/*
+Practice Question
+Carnival would like to create a stored procedure that handles the case of updating their vehicle inventory when a sale occurs. 
+They plan to do this by flagging the vehicle as is_sold which is a field on the Vehicles table. 
+When set to True this flag will indicate that the vehicle is no longer available in the inventory. 
+Why not delete this vehicle? We don't want to delete it because it is attached to a sales record.
+*/
+
+
+
+create procedure changeVehicleStatusToIsSold (in vehicle_id_param int)
+language plpgsql
+as $$
+begin 
+	
+update vehicles v 
+set is_sold = true
+where v.vehicle_id = vehicle_id_param; 
+
+end 
+$$;
+
+
+--call the stored procedure and pass in the vehicle_id that's being sold
+
+call changeVehicleStatusToIsSold(1);
+
+
+
+
+
+-- team answer
+
+/*
+CREATE PROCEDURE car_sold(vehicle int)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+	--mark car as being as beind sold	
+	update vehicles 
+	set is_sold = true 
+	where vehicle_id = vehicle;
+	commit;
+end;$$
+*/
+
+
+
+
 -- Practice Question
--- Carnival would like to create a stored procedure that handles the case of updating their vehicle inventory when a sale occurs. 
--- They plan to do this by flagging the vehicle as is_sold which is a field on the Vehicles table. 
--- When set to True this flag will indicate that the vehicle is no longer available in the inventory. 
--- Why not delete this vehicle? We don't want to delete it because it is attached to a sales record.
+-- Carnival would also like to handle the case for when a car gets returned by a customer. 
+-- When this occurs they must add the car back to the inventory and mark the original sales record as sale_returned = TRUE.
+-- Carnival staff are required to do an oil change on the returned car before putting it back on the sales floor. 
+-- In our stored procedure, we must also log the oil change within the OilChangeLogs table.
 
 
+-- start of stored procedure
+create or replace procedure vehicle_returned(in vehicle_id_param int)
+language plpgsql
+as $$
+begin
+	
+	-- change is_returned to true in sales table
+	update sales 
+	set sale_returned = true
+	where vehicle_id = vehicle_id_param;
+	
+	-- change is_sold and is_new to false in vehicles
+	update vehicles 
+	set is_sold = false,
+		is_new = false
+	where vehicle_id = vehicle_id_param;
+	
+	-- create new entry in OilChageLogs
+	insert into oilchangelogs (date_occured, vehicle_id)
+	values (now(), vehicle_id_param);
+
+end
+$$;
+
+
+-- run the stored procedure by passing in the vehicle id
+call vehicle_returned(1);
+
+
+-- helper queries for the above practice question
+select * from sales where vehicle_id = 1 -- has sales_returned column
+select * from vehicles where vehicle_id = 1 -- is_sold, is_new
+select * from oilchangelogs 
+
+-- delete
+delete from oilchangelogs 
+where oil_change_log_id = 1
+
+--change values back after running vehicle_returned stored procedure for testing
+update sales 
+set sale_returned = false 
+where vehicle_id = 1
+
+update vehicles 
+set is_sold = true,
+	is_new = true 
+where vehicle_id = 1
+
+
+-- team answer
+/*
 CREATE or replace procedure car_return(vehicle int, is_used bool)
 LANGUAGE plpgsql
 AS $$
 BEGIN
-	--mark car as being as beind returned
+	--mark car as being returned
 	update sales 
 	set sale_returned = true 
 	where vehicle_id = vehicle;
@@ -87,31 +215,12 @@ BEGIN
 	values (NOW(), vehicle);
 	commit;
 end;$$
+*/
 
 
 
 
--- Practice Question
--- Carnival would also like to handle the case for when a car gets returned by a customer. 
--- When this occurs they must add the car back to the inventory and mark the original sales record as sale_returned = TRUE.
--- Carnival staff are required to do an oil change on the returned car before putting it back on the sales floor. 
--- In our stored procedure, we must also log the oil change within the OilChangeLogs table.
 
-
-CREATE PROCEDURE car_sold(vehicle int)
-LANGUAGE plpgsql
-AS $$
-BEGIN
-	--mark car as being as beind sold	
-	update vehicles 
-	set is_sold = true 
-	where vehicle_id = vehicle;
-	commit;
-end;$$
-
-
-
-select * from dealerships d 
 
 
 -- Chapter 5
