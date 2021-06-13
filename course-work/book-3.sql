@@ -223,13 +223,96 @@ end;$$
 
 
 
--- Chapter 5
- 
+-- Chapter 5 - Triggers Introduction
+
+/*
+A trigger is a user defined function that is executed when a specific action occurs. 
+Once the trigger is defined, it is put into action automatically when the approprate event takes place
+Triggers must always be assosciated with a table
+You can define a trigger for the following statements insert, update, delete, truncate
+Trigers can be row level or statement level; row level mean once for every row; statement level is invoked only once per event
+A trigger can be defined to run before or after the event
+
+In order to create a trigger, you must do two things
+
+1. Define a trigger function with 'Create Function' 
+	
+
+	CREATE FUNCTION set_pickup_date() 
+	RETURNS TRIGGER 
+	LANGUAGE PlPGSQL
+	AS $$
+	BEGIN
+	  -- trigger function logic
+	  UPDATE sales
+	  SET pickup_date = NEW.purchase_date + integer '7'
+	  WHERE sales.sale_id = NEW.sale_id;
+	  
+	  RETURN NULL;
+	END;
+	$$
+	
+	
+2. Bind the function you created to a table with 'Create Trigger'
+	
+	CREATE TRIGGER new_sale_made
+	AFTER INSERT
+	ON sales
+	FOR EACH ROW
+	EXECUTE PROCEDURE set_pickup_date();
+	
+	
+**/
+
+
 
 -- Practice Question
 -- Create a trigger for when a new Sales record is added, set the purchase date to 3 days from the current date.
 
 
+create function addThreeDaysToPurchaseDate()
+	returns trigger
+	language plpgsql
+as $$
+begin
+	--sql logic goes here
+	update sales 
+	set purchase_date = new.purchase_date + integer '3'
+	where sales.sale_id = new.sale_id;
+	
+	return null;
+end;
+$$
+
+
+create trigger afterNewSaleAddThreeDaysToPurchaseDate
+	after insert 
+	on sales
+	for each row 
+	execute procedure addThreeDaysToPurchaseDate();
+
+
+
+--helper queries
+	select * from sales
+	order by sale_id desc
+	
+	delete from sales 
+	where sale_id = 5004
+	
+	drop trigger afterNewSaleAddThreeDaysToPurchaseDate on sales
+	
+	drop function addThreeDaysToPurchaseDate 
+	
+	INSERT INTO public.sales
+	(sales_type_id, vehicle_id, employee_id, customer_id, dealership_id, price, deposit, purchase_date, pickup_date, invoice_number, payment_method, sale_returned)
+	VALUES(1, 1001, 2, 22, 7, 12345, 123, now(), now(), null, 'fancy credit card', false);
+
+
+
+
+-- team answer
+/*
 select * from sales
 order by sale_id desc 
 
@@ -244,9 +327,10 @@ language PlPGSQL
 as $$
 begin
 	update sales 
-	set purchase_date = new.purchase_date + 
+	set purchase_date = new.purchase_date + integer '3'
 end;
 $$
+*/
 
 
 
@@ -255,5 +339,56 @@ $$
 -- If the pickup date is after the purchase date but less than 7 days out from the purchase date, add 4 additional days to the pickup date.
 
 
+create function adjustPickupDate()
+	returns trigger
+	language pipgsql
+as $$
+begin
 
+	
+	
+end;
+$$
+
+
+
+
+
+
+
+
+
+
+
+
+--helper queries
+	select * from sales
+	order by sale_id desc
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 
