@@ -339,24 +339,47 @@ $$
 -- If the pickup date is after the purchase date but less than 7 days out from the purchase date, add 4 additional days to the pickup date.
 
 
-create function adjustPickupDate()
+
+create function adjustPickupDateFunction()
 	returns trigger
-	language pipgsql
+	language plpgsql
 as $$
 begin
 
+	-- pickup date on or before purchase date, set pickup date 7 days after purchase date 
 	
+	if new.pickup_date <= new.purchase_date 
+	then 
+		update sales 
+		set pickup_date = purchase_date + integer '7'
+		where sale_id = new.sale_id;
+
 	
+	-- if pickup date is after the purchase date but less than 7 days out, add 4 additional days to the pickup date
+
+	elseif new.pick_up_date > new.sales.purchase_date and new.pick_up_date < integer '7' 
+	then
+		update sales
+		set pickup_date = purchase_date + integer '4'
+		where sale_id  = new.sale_id;
+	
+	else 
+		update sales 
+		set pickup_date = new.pickup_date;
+	end if;
+	
+	return null;
 end;
 $$
 
 
 
-
-
-
-
-
+create trigger changePickupDateTrigger
+	after insert 
+	on sales
+	for each row
+	execute procedure adjustPickupDateFunction();
+	
 
 
 
@@ -365,6 +388,13 @@ $$
 	select * from sales
 	order by sale_id desc
 	
+	drop trigger changePickupDateTrigger on sales
+
+	drop function adjustPickupDateFunction 
+	
+	INSERT INTO public.sales
+	(sales_type_id, vehicle_id, employee_id, customer_id, dealership_id, price, deposit, purchase_date, pickup_date, invoice_number, payment_method, sale_returned)
+	VALUES(1, 1001, 2, 22, 7, 12345, 123, now(), '20210613'::text::date, null, 'fancy credit card', false);
 	
 	
 	
