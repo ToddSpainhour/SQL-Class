@@ -532,21 +532,3 @@ group by d.business_name, e.employee_id, e.first_name, e.last_name, s.sale_id, s
 --order by count(s.employee_id) 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
